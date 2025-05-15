@@ -185,5 +185,5 @@ def main_parallel(json_path):
     print(f"处理失败: {errors}")
 
 if __name__ == "__main__":
-    drama_json = './Spatial/_MRSDrama2_metadata_fix.json'
+    drama_json = './Spatial/_MRSDrama.json'
     main_parallel(drama3_json)
