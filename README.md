@@ -21,6 +21,7 @@ This repository contains the scripts for data processing and evaluation metrics 
 ├── data_process
 ├── head.png
 ├── README.md
+├── MAA-2
 ├── rmssinger
 ├── spatial_eval
 └── spatial_fad
