@@ -155,8 +155,8 @@ def align_long_overlap(
 
         # TODO: Probably can get some speedup gain with batched inference here
         waveform_segment = audio[:, f1:f2]
-        chunk_seconds = 20  # 主块长度（秒）
-        overlap_seconds = 2  # 重叠秒数
+        chunk_seconds = 20  
+        overlap_seconds = 2 
         downsample_rate = 320
         
         chunk_samples = int(chunk_seconds * SAMPLE_RATE)

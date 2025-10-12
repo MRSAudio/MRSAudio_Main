@@ -106,8 +106,6 @@ def main():
     base_dir = "./Spatial/MRSDrama3"
     for root, _dirs, files in os.walk(base_dir):
         for _dir in tqdm(sorted(_dirs)):
-            if "2025" not in _dir or "20250424-141610-7-cg-lk-lyh-《教父》电影剧本_part1" in _dir:
-                continue
             dir_path = os.path.join(root, _dir)
             print(f"Processing directory: {dir_path}")
             json_path = [os.path.join(dir_path, f) for f in os.listdir(dir_path) if f.endswith(".json")][0]
@@ -123,25 +121,25 @@ def main():
             wav_out = wav_path.replace(".wav", "_cut.wav")
             log_out = log_paths[0].replace(".npy", "_cut.npy")
             if os.path.exists(vid_out) and os.path.exists(wav_out) and os.path.exists(log_out):
-                print(f"文件已存在: {vid_out}, {wav_out}, {log_out}")
+                print(f"All cut files exist, skipping: {dir_path}")
                 continue
-            print(f"开始时间: {start_time}, 持续时间: {duration}")
+            print(f"start_time: {start_time}, duration: {duration}")
             if not os.path.exists(vid_out):
                 cut_vid(vid_path, start_time - vid_time, duration, vid_path.replace(".mp4", "_cut.mp4"))
-                print(f"视频前面截取长度: {start_time - vid_time}, 长度: {duration}")
+                print(f"video cut length: {duration}")
             if not os.path.exists(wav_out):
                 cut_wav(wav_path, start_time - wav_time, duration, wav_path.replace(".wav", "_cut.wav"))
-                print(f"音频前面截取长度: {start_time - wav_time}, 长度: {duration}")
+                print(f"wav cut length: {duration}")
             if not os.path.exists(log_out):
                 cut_npy(log_paths, start_time - log_time, duration)
-                print(f"npy前面截取长度: {start_time - log_time}, 长度: {duration}")
+                print(f"npy cut length: {duration}")
             # break
-    print(f"总时长: {sum}s")
+    print(f"sum time: {sum}s")
     # translate second into HH:MM:SS
     hours = sum // 3600
     minutes = (sum % 3600) // 60
     seconds = sum % 60
-    print(f"总时长: {int(hours)}小时{int(minutes)}分钟{int(seconds)}秒")
+    print(f"sum time: {int(hours)}小时{int(minutes)}分钟{int(seconds)}秒")
             
             
 if __name__ == "__main__":

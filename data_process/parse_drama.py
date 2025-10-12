@@ -107,14 +107,14 @@ def generate_json(textgrid_path, txt_path):
         match_result = find_best_match(intervals, target_chars, current_pos)
         
         if not match_result:
-            errors.append(f"匹配失败：第{idx+1}句 -> {target_chars}")
+            errors.append(f"failed: sentence {idx+1} -> {target_chars}")
             continue
             
         start, end = match_result
         matched_intervals = intervals[start:end+1]
         
         if not matched_intervals:  
-            errors.append(f"匹配失败：第{idx+1}句 -> {target_chars} (无匹配间隔)")
+            errors.append(f"failed: sentence {idx+1} -> {target_chars}")
             continue
 
         current_pos = end + 1
@@ -134,7 +134,7 @@ def generate_json(textgrid_path, txt_path):
         
         
         if target_ptr < len(target_clean):
-            errors.append(f"部分匹配：第{idx+1}句 -> 原句：{target_chars} | 匹配到：{''.join(aligned_text)}")
+            errors.append(f"partial matched: sentence {idx+1} -> origin: {target_chars} | matched: {''.join(aligned_text)}")
         
         
         words = []

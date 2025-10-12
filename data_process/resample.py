@@ -12,7 +12,6 @@ base_dir = "./data/Spatial/drama_splitspker"
 def resample(file, target_sr=48000):
     y, orig_sr = librosa.load(file, sr=None, mono=False)
     if orig_sr != 48000:
-        print(f"文件采样率不符合要求：{file}，当前采样率：{orig_sr}")
         with sf.SoundFile(file) as f:
             originalsubtype = f.subtype
         

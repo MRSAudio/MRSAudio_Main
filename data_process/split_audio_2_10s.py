@@ -26,7 +26,7 @@ if __name__ == "__main__":
     
         length = min(position.shape[0], int(wav_duration * 20))
         if position.shape[0] > wav_duration * 20:
-            print(f"文件长度: {length}, wav_duration: {wav_duration*20}, position.shape[0]: {position.shape[0]}")
+            print(f"file length: {length}, wav_duration: {wav_duration*20}, position.shape[0]: {position.shape[0]}")
         
         for i in range(0, length, 200):
             
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             
             new_position = position[i:i+200]
             if new_position.shape[0] < 200:  
-                print(f"最后片段不足 200 行: {new_position.shape[0]} 行")
+                print(f"last part less than 200 : {new_position.shape[0]}")
             
             new_pos_fn = os.path.join(audio_pos_dir, f"{key}_{i//200}.npy")
             np.save(new_pos_fn, new_position)
@@ -50,4 +50,4 @@ if __name__ == "__main__":
             
     with open(split_json, 'w', encoding='utf-8') as f:
         json.dump(all_data, f, ensure_ascii=False, indent=4)
-        print(f"保存切割后的数据: {split_json}")
+        print(f"saved: {split_json}")

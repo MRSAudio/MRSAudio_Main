@@ -190,7 +190,6 @@ def prepare_align_worker(wav_file, config):
         return {"status": "error", "file": wav_file, "reason": str(e)}
 
 def prepare_align(config):
-    """并行处理主函数"""
     in_dir = config["path"]["corpus_path"]
     mfa_input = config["path"]["mfa_input"]
     os.makedirs(mfa_input, exist_ok=True)
@@ -198,7 +197,7 @@ def prepare_align(config):
     
     wav_files = glob.glob(os.path.join(in_dir, '**', 'split_spker', '*.wav'), recursive=True)
     wav_files = [f for f in wav_files if os.path.basename(f).split('_')[0] not in ERROR_AUDIO]
-    print(f"发现 {len(wav_files)} 个待处理音频文件")
+    print(f"found {len(wav_files)} wav files to process.")
 
     
     workers = max(1, int(cpu_count() * 0.75))  
@@ -209,14 +208,14 @@ def prepare_align(config):
         task = partial(prepare_align_worker, config=config)
         
         
-        with tqdm(total=len(wav_files), desc="处理进度") as pbar:
+        with tqdm(total=len(wav_files)) as pbar:
             for result in pool.imap_unordered(task, wav_files):
                 results.append(result)
                 pbar.update(1)
                 pbar.set_postfix({
-                    "成功": sum(1 for r in results if r["status"] == "success"),
-                    "跳过": sum(1 for r in results if r["status"] == "skipped"),
-                    "错误": sum(1 for r in results if r["status"] == "error")
+                    "success": sum(1 for r in results if r["status"] == "success"),
+                    "skipped": sum(1 for r in results if r["status"] == "skipped"),
+                    "error": sum(1 for r in results if r["status"] == "error")
                 })
 
     
@@ -224,17 +223,17 @@ def prepare_align(config):
     skipped = sum(1 for r in results if r["status"] == "skipped")
     errors = sum(1 for r in results if r["status"] == "error")
     
-    print("\n处理完成:")
-    print(f"成功: {success} 个文件")
-    print(f"跳过: {skipped} 个文件")
-    print(f"错误: {errors} 个文件")
-
+    print("\nfinished:")
+    print(f"total files: {len(wav_files)}")
+    print(f"success: {success}")
+    print(f"skipped: {skipped}")
+    print(f"error: {errors}")
     
     if errors > 0:
-        print("\n错误详情（前20个）:")
+        print("\n:")
         for r in results[:20]:
             if r["status"] == "error":
-                print(f"文件: {r['file']}\n原因: {r['reason']}\n{'-'*50}")
+                print(f"file: {r['file']}\nreason: {r['reason']}\n{'-'*50}")
 
 
 def normalize_loudness(wav_path, target_loudness, save_path, target_sample_rate=None):

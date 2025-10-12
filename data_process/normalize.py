@@ -8,7 +8,6 @@ from multiprocessing import Pool, cpu_count
 import traceback
 
 def process_single_file(args):
-    """处理单个音频文件的worker函数"""
     file_path, target_lufs, overwrite = args
     
     
@@ -36,7 +35,7 @@ def process_single_file(args):
         
         if loudness == float("-inf"):
             norm_data = data
-            print(f"静音文件跳过: {file_path}")
+            print(f"skipped: {file_path}")
         else:
             
             norm_data = pyln.normalize.loudness(data, loudness, target_lufs)
@@ -53,20 +52,21 @@ def process_single_file(args):
         return file_path, None
     
     except Exception as e:
-        error_msg = f"{file_path} 处理失败: {str(e)}\n{traceback.format_exc()}"
+        error_msg = f"{file_path} fail: {str(e)}\n{traceback.format_exc()}"
         return file_path, error_msg
 
 def normalize_to_lufs_parallel(input_dir, target_lufs=-23.0, overwrite=True, workers=32):
     """
-    并行响度归一化版本
+    normalize all *_缩混_cut.wav files in input_dir subdirectories to target_lufs
+    and save to spatial_normalized subdirectory (or overwrite if specified)
     """
     
     pattern = os.path.join(input_dir, "*", "*_缩混_cut.wav")
     audio_files = sorted(glob.glob(pattern))
-    print(f"找到 {len(audio_files)} 个音频文件")
+    print(f"found {len(audio_files)} files to process.")
 
     if not audio_files:
-        print("未找到匹配文件")
+        print("no audio files found, exiting.")
         return
 
     
@@ -76,18 +76,18 @@ def normalize_to_lufs_parallel(input_dir, target_lufs=-23.0, overwrite=True, wor
     error_log = []
     with Pool(processes=min(workers, len(audio_files))) as pool:
         
-        with tqdm(total=len(audio_files), desc="音频归一化") as pbar:
+        with tqdm(total=len(audio_files)) as pbar:
             for file_path, error in pool.imap_unordered(process_single_file, task_args):
                 if error:
                     error_log.append(error)
                     pbar.write(error)  
                 pbar.update(1)
-                pbar.set_postfix({"错误数": len(error_log)})
+                pbar.set_postfix({"error": len(error_log)})
 
     
-    print(f"\n处理完成: 成功 {len(audio_files)-len(error_log)}/{len(audio_files)}")
+    print(f"\nfinished processing {len(audio_files)} files.")
     if error_log:
-        print(f"错误文件 ({len(error_log)} 个):")
+        print(f"error files: ({len(error_log)} 个):")
         for err in error_log[:5]:  
             print("-"*50)
             print(err)

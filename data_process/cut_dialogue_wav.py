@@ -43,7 +43,7 @@ def merge_segments(segments):
     return merged
 
 def process_single_file(json_path):
-    """处理单个JSON文件"""
+    """handle a single JSON file: merge segments, cut audio, save new config"""
     results = {
         'total_clips': 0,
         'merged_clips': 0,
@@ -64,13 +64,13 @@ def process_single_file(json_path):
             os.path.basename(wav_dir) + "_缩混_cut.wav" 
         )
         if not os.path.exists(original_wav_path):
-            raise FileNotFoundError(f"原始音频不存在: {original_wav_path}")
+            raise FileNotFoundError(f"original WAV not found: {original_wav_path}")
 
         with sf.SoundFile(original_wav_path) as f:
             original_subtype = f.subtype
         y, sr = librosa.load(original_wav_path, sr=None, mono=False)
         if y.ndim == 1:
-            raise ValueError("单声道音频不符合要求")
+            raise ValueError("mono audio not supported")
         y = y.T  # (samples, channels)
 
         with open(json_path, 'r') as f:
@@ -163,9 +163,8 @@ def main():
     ]
     
     # prepare for processing
-    print("正在扫描任务...")
     total_original = count_total_clips(json_files)
-    print(f"发现 {len(json_files)} 个文件，共 {total_original} 个原始片段")
+    print(f"found {len(json_files)} JSON files with total {total_original} original clips.")
 
     stats = {
         'total_original': total_original,
@@ -176,7 +175,7 @@ def main():
         'file_errors': []
     }
 
-    pbar = tqdm(total=len(json_files), desc="🔄 处理文件中")
+    pbar = tqdm(total=len(json_files), desc="processing files")
 
     # parallel processing
     with Pool(32) as pool:
@@ -192,27 +191,29 @@ def main():
             # update progress bar
             pbar.update(1)
             pbar.set_postfix({
-                '合并率': f"{1 - stats['total_merged']/stats['total_original']:.1%}",
-                '成功率': f"{stats['success']/stats['total_merged']:.1%}" if stats['total_merged'] else '0%'
+                'merged': stats['total_merged'],
+                'success': stats['success'],
+                'skipped': stats['skipped'],
+                'errors': len(stats['errors']),
+                'file_errs': len(stats['file_errors'])  
             })
-
     pbar.close()
 
     # output
-    print("\n处理报告:")
-    print(f"原始片段总数: {stats['total_original']}")
-    print(f"合并后片段数: {stats['total_merged']} (减少 {stats['total_original']-stats['total_merged']})")
-    print(f"成功生成: {stats['success']}")
-    print(f"跳过文件: {stats['skipped']}")
-    print(f"失败片段: {len(stats['errors'])}")
-    print(f"失败文件: {len(stats['file_errors'])}")
-
+    print("\nProcessing complete.")
+    print(f"Total original clips: {stats['total_original']}")
+    print(f"Total merged clips: {stats['total_merged']}")
+    print(f"Successfully processed clips: {stats['success']}")
+    print(f"Skipped existing clips: {stats['skipped']}")
+    print(f"Total segment errors: {len(stats['errors'])}")
+    print(f"Total file errors: {len(stats['file_errors'])}")
+    
     # error log
     if stats['errors'] or stats['file_errors']:
         for err in stats['file_errors'][:10]:
-            print(f"文件错误: {err}")
+            print(f"file error: {err}")
         for err in stats['errors'][:10]:
-            print(f"片段错误: {err}")
+            print(f"segment error: {err}")
             
 if __name__ == "__main__":
     main()

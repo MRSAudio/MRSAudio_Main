@@ -2,9 +2,12 @@ import math
 
 def euler_to_quaternion(yaw_deg, pitch_deg, roll_deg):
     """
-    将欧拉角（Z-X-Y顺序）转换为四元数。
-    参数顺序：航向角(yaw, 绕Z轴), 俯仰角(pitch, 绕X轴), 滚转角(roll, 绕Y轴)，单位为度。
-    返回四元数 (w, x, y, z)。
+    euler angles (in degrees) to quaternion (w, x, y, z)
+    yaw (Z), pitch (X), roll (Y)  -- Tait-Bryan angles, intrinsic rotations
+    1. Rotate around Z axis (yaw)
+    2. Rotate around X axis (pitch)
+    3. Rotate around Y axis (roll)
+    4. The final rotation is R = R_y * R_x * R_z
     """
     
     yaw = math.radians(yaw_deg)

@@ -56,7 +56,7 @@ def process_data_3d(file_path):
         
         
         def calc_components(pos, ref_point):
-            """计算相对于参考点的径向/法向速度分量"""
+            """calculate radial and normal components of velocity"""
             
             vec_to_ref = pos - ref_point
             dist = np.linalg.norm(vec_to_ref)
@@ -103,7 +103,7 @@ def process_static_scene(file_path, orient):
     return processed_data
 
 def process_single_file(args):
-    """处理单个文件的worker函数"""
+    """function to process a single file, suitable for parallel execution"""
     key, value = args
     try:
         npy_file = value["pos_fn"].replace('drama_splitspker', 'drama_pos_recut')
@@ -129,12 +129,12 @@ def process_single_file(args):
             elif scene == 7:
                 orient = euler_to_quaternion(-90, 0, 0)
             else:
-                print(f"未知场景{scene}: {key}: {value['spatial_prompt']}")
+                print(f"unknown scene {scene}: {key}: {value['spatial_prompt']}")
                 orient = euler_to_quaternion(0, 0, 0)
             
             processed_data = process_static_scene(npy_file, orient)
         else:
-            print(f"未知场景: {key}: {value['spatial_prompt']}")
+            print(f"unknown scene {key}: {value['spatial_prompt']}")
         np.save(output_file, np.hstack((processed_data[:, :7], processed_data[:, [8]], processed_data[:, [10]])))
         
         return key, {"status": "success", "path": output_file}
@@ -157,32 +157,29 @@ def main_parallel(json_path):
     
     with Pool(processes=workers) as pool:
         
-        with tqdm(total=len(task_args), desc="处理3D数据") as pbar:
+        with tqdm(total=len(task_args), ) as pbar:
             for key, result in pool.imap_unordered(process_single_file, task_args):
                 results[key] = result
                 
                 
                 pbar.update(1)
                 pbar.set_postfix({
-                    "成功": sum(1 for v in results.values() if v["status"] == "success"),
-                    "跳过": sum(1 for v in results.values() if v["status"] == "skipped"),
-                    "错误": sum(1 for v in results.values() if v["status"] == "error")
+                    "success": sum(1 for v in results.values() if v["status"] == "success"),
+                    "skipped": sum(1 for v in results.values() if v["status"] == "skipped"),
+                    "error": sum(1 for v in results.values() if v["status"] == "error")
                 })
                 
                 
                 if result["status"] == "error":
-                    pbar.write(f"错误处理 {key}:\n{result['error']}")
+                    pbar.write(f"error: {key}:\n{result['error']}")
 
     
     success = sum(1 for v in results.values() if v["status"] == "success")
     skipped = sum(1 for v in results.values() if v["status"] == "skipped")
     errors = sum(1 for v in results.values() if v["status"] == "error")
     
-    print("\n处理完成:")
-    print(f"总文件数: {len(task_args)}")
-    print(f"成功处理: {success}")
-    print(f"跳过已存在: {skipped}")
-    print(f"处理失败: {errors}")
+    print("finished")
+    print(f"success: {success}, skipped: {skipped}, error: {errors}")
 
 if __name__ == "__main__":
     drama_json = './Spatial/_MRSDrama.json'
