@@ -1,0 +1,10 @@
+{
+    "base_channel": 0,
+
+    "amp_phasediff":{
+        "ch": 7
+    },
+    "binaural_phasediff":{
+        "ch": 3
+    }
+}
