@@ -72,14 +72,12 @@ For music generation, see [MAA-2](./MAA-2/README.md).
 If you find this dataset or code useful for your research, please cite our work:
 
 ```bib
-<!--
 @article{guo2025mrsaudio,
   title={MRSAudio: A Large-Scale Multimodal Recorded Spatial Audio Dataset with Refined Annotations},
   author={Guo, Wenxiang and Pan, Changhao and Zhu, Zhiyuan and Hu, Xintong and Zhang, Yu and Zhao, Zhou},
-  journal={arXiv preprint arXiv:},
+  journal={arXiv preprint arXiv:2510.10396},
   year={2025}
 }
--->
 ```
 
 ---
